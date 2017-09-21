@@ -13,6 +13,7 @@ global USER_NAME  # 入驻商账号名
 global USER_ID  # UID 入驻商账号ID
 global SUPPLIER_NAME  # 店铺名字
 global GOODS_ID  # 添加商品图片 用
+global CAT_ID  #店铺内 分类ID
 
 global CONN  # 数据库连接
 global CURSOR  # 数据库游标
@@ -104,6 +105,7 @@ def DefineID(index=1):
 #检查商品重复
 def CheckGoodsRepeat():
     global CURSOR
+    #??商品查重有问题 不能用名字查询 一个bytes 一个 str
     rowNums = CURSOR.execute('SELECT goods_name FROM ecs_goods WHERE goods_name = %s',(GOODS_NAME))
     if rowNums:
         return True
@@ -127,13 +129,22 @@ def AddGoods():
     global GOODS_THUMB #-> 商品缩略图
     global GOODS_IMG  # -> 商品图
     global ORGINAL_IMG  #-> 原始图像
+    global GOODS_ID
     global CURSOR
     GOODS_THUMB = '' # -> 商品缩略图
     GOODS_IMG = ''# -> 商品图
     ORGINAL_IMG = '' # -> 原始图像
 
-    sql = '''INSERT INTO `ecs_goods` VALUES ('', '2', %s, %s, '+', '0', '0', '', '9999', '0.000', '0.00', '0.00', '0.00', '0', '0', '0', '0', '0', '0', '1', '服装,服饰', '服装服饰批发，库存尾货大全',  %s,  %s, %s, %s , '1', '', '1', '1', '0', '0', %s, '100', '0', '0', '0', '0', '0', '10.0', '0', %s, '2', '', '-1', '-1', '0', %s, '0', '', '0', '1', '0.00', '0', '0')'''
+    sql = '''INSERT INTO `ecs_goods` VALUES ('', '2', %s, %s, '+', '2', '0', '', '9999', '0.000', '0.00',
+     '0.00', '0.00', '0', '0', '0', '0', '0', '0', '1', '服装,服饰', '服装服饰批发，库存尾货大全', %s,  %s, %s, %s , '1',
+       '', '1', '1', '0', '0', %s, '100', '0', '0', '0', '0', '0', '10.0', '0', %s,
+       '2', '', '-1', '-1', '', %s, '1', '', '', '0', '0.00', '', '0')'''
     CURSOR.execute(sql, (GOODS_SN, GOODS_NAME, GOODS_DESC,GOODS_THUMB,GOODS_IMG,ORGINAL_IMG,ADD_TIME,ADD_TIME,SUPPLIER_ID))
+    #获取GOODS_ID
+    CURSOR.execute('SELECT MAX(goods_id) FROM ecs_goods')
+    goodList = CURSOR.fetchall()
+    GOODS_ID = goodList[0][0]
+
 
 #创建店铺
 def CreateSupplier():
@@ -193,6 +204,32 @@ def DecorationSupplier():
     CURSOR.execute("INSERT INTO `ecs_supplier_shop_config` VALUES ('102', '1', 'shop_title', 'text', '', '', %s, '1', %s)",
         (SUPPLIER_NAME, SUPPLIER_ID))
 
+#添加店铺分类 并 确定CAT_ID
+def AddSupplierCategory():
+    global CURSOR
+    global CAT_ID
+    #判断该店铺是否含有分类
+    rowNums = CURSOR.execute('SELECT cat_id FROM ecs_supplier_category WHERE supplier_id = %s',(SUPPLIER_ID))
+    if rowNums:
+        catList = CURSOR.fetchall()
+        CAT_ID = catList[0][0]
+    else:
+        # 没有则创建一个分类
+        sql = '''INSERT INTO `ecs_supplier_category` VALUES ('', '服装', '', '服装服饰', '0', '50', '', '',
+             '1', '', '1', '0', '', %s, '1', '', '', '8')'''
+        CURSOR.execute(sql, (SUPPLIER_ID))
+        #查找cat_id
+        CURSOR.execute('SELECT cat_id FROM ecs_supplier_category WHERE supplier_id = %s', (SUPPLIER_ID))
+        catList = CURSOR.fetchall()
+        CAT_ID = catList[0][0]
+
+# 绑定分类与商品
+def BindCatGoods():
+    global CURSOR
+    sql = '''INSERT INTO `ecs_supplier_goods_cat` VALUES (%s, %s, %s)'''
+    CURSOR.execute(sql, (GOODS_ID, CAT_ID, SUPPLIER_ID))
+
+
 # 添加图片
 def AddGoodsPhoto(imgList):
     global GOODS_ID
@@ -212,7 +249,6 @@ def FindDBInfo():
     global INFOLIST_C  # 客户数据库 的信息列表
     try:
         CONN_C = pymysql.connect(host='42.51.41.149', port=3309, user='root', passwd='qycloud', db='sns', charset='utf8')
-
         # 获取游标
         global CURSOR_C
         CURSOR_C = CONN_C.cursor()
