@@ -34,6 +34,7 @@ global PASSWD_C  # 用户密码
 global DB_C  # 连接数据库
 
 global INFOLIST_C  # 客户数据库 的信息列表
+global IMGLIST_C #客户数据库的图片列表
 
 def InputInfo():
     #存入文件，若文件不为空，则可以直接填充，否则提醒输入
@@ -105,6 +106,9 @@ def DefineID(index=1):
 #检查商品重复
 def CheckGoodsRepeat():
     global CURSOR
+    rowNums = CURSOR.execute('SELECT goods_sn FROM ecs_goods WHERE goods_sn = %s', (GOODS_SN))
+    if rowNums:
+        return True
     #??商品查重有问题 不能用名字查询 一个bytes 一个 str
     rowNums = CURSOR.execute('SELECT goods_name FROM ecs_goods WHERE goods_name = %s',(GOODS_NAME))
     if rowNums:
@@ -131,7 +135,10 @@ def AddGoods():
     global ORGINAL_IMG  #-> 原始图像
     global GOODS_ID
     global CURSOR
-    GOODS_THUMB = '' # -> 商品缩略图
+    if len(IMGLIST_C) > 0:
+        GOODS_THUMB = IMGLIST_C[0][0] # -> 商品缩略图
+    else:
+        GOODS_THUMB = ''
     GOODS_IMG = ''# -> 商品图
     ORGINAL_IMG = '' # -> 原始图像
 
@@ -231,11 +238,10 @@ def BindCatGoods():
 
 
 # 添加图片
-def AddGoodsPhoto(imgList):
-    global GOODS_ID
+def AddGoodsImg():
     global CURSOR
-    for img_url in imgList:
-        CURSOR.execute("INSERT INTO `ecs_goods_gallery` VALUES ('', %s, %s, '', %s, %s, '0', '0', '0')",(GOODS_ID,img_url,img_url,img_url))
+    for img_url in IMGLIST_C:
+        CURSOR.execute("INSERT INTO `ecs_goods_gallery` VALUES ('', %s, %s, '', %s, %s, '0', '0', '0')",(GOODS_ID,img_url[0],img_url[0],img_url[0]))
 
 #查询客户的数据库信息
 def FindDBInfo():
@@ -247,6 +253,7 @@ def FindDBInfo():
     global PASSWD_C  # 用户密码
     global DB_C  # 连接数据库
     global INFOLIST_C  # 客户数据库 的信息列表
+
     try:
         CONN_C = pymysql.connect(host='42.51.41.149', port=3309, user='root', passwd='qycloud', db='sns', charset='utf8')
         # 获取游标
@@ -254,8 +261,9 @@ def FindDBInfo():
         CURSOR_C = CONN_C.cursor()
 
         rowNums = CURSOR_C.execute('SELECT sns_id,timestamp,content,author_name,author_id,media_count FROM tween_')
-        print('查询对象数据库 数据  ' + str(rowNums) + '  条')
+        print('查询对象数据库 商品数据  ' + str(rowNums) + '  条')
         INFOLIST_C = CURSOR_C.fetchall()
+
     except pymysql.OperationalError:
         #连接失败
         ErrorInfo(2001)
@@ -268,6 +276,13 @@ def FindDBInfo():
         # 连接成功
         SuccessInfo(400)
     return True
+
+def FindImgInfo():
+    global CURSOR_C  # 数据库游标 客户
+    global IMGLIST_C
+    rowNums = CURSOR_C.execute('SELECT url FROM media_ WHERE sns_id = %s',(GOODS_SN))
+    print('查询对象数据库 商品数据  ' + str(rowNums) + '  条')
+    IMGLIST_C = CURSOR_C.fetchall()
 
 #错误输出信息
 def ErrorInfo(index):

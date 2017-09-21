@@ -10,7 +10,7 @@ def main():
         #查询客户数据库 获取对应信息 函数 FindDBInfo()#得到一个数据库商品列表 INFOLIST_C
         if fc.FindDBInfo():
             #提取出数据库已有的每一条商品信息
-            for i in range(2):#range(len(fc.INFOLIST_C)):
+            for i in range(4):#range(len(fc.INFOLIST_C)):
                 fc.GOODS_SN = fc.INFOLIST_C[i][0] #货品编号
                 fc.ADD_TIME = fc.INFOLIST_C[i][1] #添加时间
                 fc.GOODS_DESC = b'<P>' + fc.INFOLIST_C[i][2] + b'</p>' #商品详情
@@ -20,6 +20,7 @@ def main():
 
                 #检查该商品是否重复，重复则跳过 True 则重复
                 if fc.CheckGoodsRepeat():
+                    print("第 ",i,"条 商品 重复，查看下一条")
                     continue
                 #检查当前店铺是否存在 True 则重复
                 if fc.CheckSupplierRepeat() == False:
@@ -37,6 +38,8 @@ def main():
                     print('该店铺已经存在')
                     # 确定Supplier_id  ,以便于添加商品
                     fc.DefineID(0)
+                # 找到所有图片
+                fc.FindImgInfo()
 
                 #开始添加商品
                 fc.AddGoods()
@@ -44,7 +47,8 @@ def main():
                 fc.AddSupplierCategory()
                 #商品与店铺绑定
                 fc.BindCatGoods()
-                #开始添加图片
+                #添加图片
+                fc.AddGoodsImg()
 
         #数据库数据提交 与 关闭
         fc.DbClose()
