@@ -39,6 +39,11 @@ def main():
                     fc.DefineID(0)
                 #开始添加商品
                 fc.AddGoods()
+                #建立店铺分类
+
+                #.
+
+                #开始添加图片
         #数据库数据提交 与 关闭
         fc.DbClose()
     else:
