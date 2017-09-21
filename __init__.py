@@ -37,13 +37,15 @@ def main():
                     print('该店铺已经存在')
                     # 确定Supplier_id  ,以便于添加商品
                     fc.DefineID(0)
+
                 #开始添加商品
                 fc.AddGoods()
                 #建立店铺分类
-
-                #.
-
+                fc.AddSupplierCategory()
+                #商品与店铺绑定
+                fc.BindCatGoods()
                 #开始添加图片
+
         #数据库数据提交 与 关闭
         fc.DbClose()
     else:
