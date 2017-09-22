@@ -1,11 +1,12 @@
 from tkinter import *
 import tkinter.messagebox #这个是消息框，对话框的关键
+import Function as fc
 
 class Reg(Frame):
     def __init__(self, master):
         frame = Frame(master)
         frame.pack()
-        self.sqlAddress = Label(frame, text="数据库地址:")
+        self.sqlAddress = Label(frame, text="主机地址:")
         self.sqlAddress.grid(row=0, column=0, sticky=W)
         self.sqlAddress_Info = Entry(frame)
         self.sqlAddress_Info.grid(row=0, column=1, sticky=W)
@@ -27,14 +28,19 @@ class Reg(Frame):
         self.sqlPsw_Info = Entry(frame, show="*")
         self.sqlPsw_Info.grid(row=3, column=1, sticky=W)
 
+        self.sqlDB = Label(frame, text="数据库:")
+        self.sqDB.grid(row=4, column=0, sticky=W)
+        self.sqlDB_Info = Entry(frame)
+        self.sqlDB_Info.grid(row=4, column=1, sticky=W)
+
         self.button = Button(frame, text="登录", command=self.Submit)
-        self.button.grid(row=4, column=1, sticky=E)
+        self.button.grid(row=5, column=1, sticky=E)
 
         self.sqlLogin_Info = Label(frame, text="")
-        self.sqlLogin_Info.grid(row=4, column=0, sticky=W)
+        self.sqlLogin_Info.grid(row=5, column=0, sticky=W)
 
         self.button2 = Button(frame, text="退出", command=frame.quit)
-        self.button2.grid(row=5, column=3, sticky=E)
+        self.button2.grid(row=6, column=3, sticky=E)
 
     def Save_Count_Info(self,HOST,PORT,USER,PASSWD):
         f.open("C:/config_info.txt",'w')
@@ -42,10 +48,12 @@ class Reg(Frame):
         f.close()
 
     def Submit(self):
-        HOST = self.sqlAddress_Info.get()
-        PORT = self.sqlPin_Info.get()
-        USER = self.sqlName_Info.get()
-        PASSWD = self.sqlPsw_Info.get()
+        fc.HOST = self.sqlAddress_Info.get()
+        fc.PORT = self.sqlPin_Info.get()
+        fc.USER = self.sqlName_Info.get()
+        fc.PASSWD = self.sqlPsw_Info.get()
+        fc.DB = self.sqlDB.get()
+
         # if USER == 'admin' and USER == '123':
         #     self.sqlLogin_Info["text"] = "登陆成功"
         # else:

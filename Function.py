@@ -36,7 +36,9 @@ global DB_C  # 连接数据库
 global INFOLIST_C  # 客户数据库 的信息列表
 global IMGLIST_C #客户数据库的图片列表
 
-def InputInfo():
+
+def InputInfo(host,port,user,passwd,db):
+
     #存入文件，若文件不为空，则可以直接填充，否则提醒输入
     global HOST  # 主机地址
     global USER  # 用户名
@@ -56,6 +58,17 @@ def InputInfo():
     PORT = 3306
     PASSWD = '123456'
     DB = 'db'
+    file_object = open('D:\config_c.txt','w')
+    try:
+        textLines = file_object.writelines(HOST+'\n' + USER + '\n'+str(PORT) +'\n'+PASSWD + '\n'+DB)
+    finally:
+        file_object.close()
+    # HOST = str(host)
+    # USER = str(user)
+    # PORT = int(port)
+    # PASSWD = str(passwd)
+    # DB = str(db)
+
 
 def DbLogin():
     try:
@@ -92,11 +105,26 @@ def DefineID(index=1):
         #确定 SUPPLIER_ID
         CURSOR.execute('SELECT MAX(supplier_id) FROM ecs_supplier')
         selectResultList = CURSOR.fetchall()
-        SUPPLIER_ID = selectResultList[0][0] + 1
+        # print (rownum)
+        # if (rownum == 1):
+        #     SUPPLIER_ID = ''
+        # else:
+        print (selectResultList[0][0])
+        if (selectResultList[0][0] == None):
+            SUPPLIER_ID = 0
+        else:
+            SUPPLIER_ID = selectResultList[0][0] + 1
         #确定 USER_ID  在原有基础上自加 1
         CURSOR.execute('SELECT MAX(uid) FROM ecs_supplier_admin_user')
         selectResultList = CURSOR.fetchall()
-        USER_ID = selectResultList[0][0] + 1
+        # if (rownum == 1):
+        #     USER_ID = 2
+        # else:
+        print (selectResultList[0][0])
+        if (selectResultList[0][0] == None):
+            USER_ID = 0
+        else:
+            USER_ID = selectResultList[0][0] + 1
     else:
         # 确定 SUPPLIER_ID
         CURSOR.execute('SELECT supplier_id FROM ecs_supplier WHERE supplier_name = %s', (SUPPLIER_NAME))
@@ -112,8 +140,8 @@ def CheckGoodsRepeat():
     #??商品查重有问题 不能用名字查询 一个bytes 一个 str
     rowNums = CURSOR.execute('SELECT goods_name FROM ecs_goods WHERE goods_name = %s',(GOODS_NAME))
     if rowNums:
-        return True
-    return False
+        return True # 重复
+    return False # 没有重复
 
 #获取所需要的所有信息
 def getAllInfo():
@@ -144,7 +172,7 @@ def AddGoods():
 
     sql = '''INSERT INTO `ecs_goods` VALUES ('', '2', %s, %s, '+', '2', '0', '', '9999', '0.000', '0.00',
      '0.00', '0.00', '0', '0', '0', '0', '0', '0', '1', '服装,服饰', '服装服饰批发，库存尾货大全', %s,  %s, %s, %s , '1',
-       '', '1', '1', '0', '0', %s, '100', '0', '0', '0', '0', '0', '10.0', '0', %s,
+       '', '1', '1', '0', '0', %s, '100', '0', '1', '1', '1', '0', '10.0', '0', %s,
        '2', '', '-1', '-1', '', %s, '1', '', '', '0', '0.00', '', '0')'''
     CURSOR.execute(sql, (GOODS_SN, GOODS_NAME, GOODS_DESC,GOODS_THUMB,GOODS_IMG,ORGINAL_IMG,ADD_TIME,ADD_TIME,SUPPLIER_ID))
     #获取GOODS_ID
@@ -153,14 +181,21 @@ def AddGoods():
     GOODS_ID = goodList[0][0]
 
 
+
 #创建店铺
 def CreateSupplier():
     global CURSOR
-    CURSOR.execute('''INSERT INTO `ecs_supplier` VALUES (%s, %s, %s, '3', '2', %s, '1', '10', '145', '1195', '冰河路', 
-              '18620241959', 'mmp@mmp.com', '', '', '', '', '', '', '', '', '', '', '', 
-              '', '0.00', '0.00', '0', '2', '', '', '1', %s, '3', '123456', '18620241959',
-               '', '', '', '', '', '123456', '123456', '123456', '123456', '', '', '', '', '',
-                '', '', '', '0.00', '', '', '', '')''',(SUPPLIER_ID,USER_ID,SUPPLIER_NAME,SUPPLIER_NAME,ADD_TIME))
+    # CURSOR.execute('''INSERT INTO `ecs_supplier` VALUES (%s, %s, %s, '3', '2', %s, '1', '10', '145', '1195', '冰河路',
+    #           '18620241959', 'mmp@mmp.com', '', '', '', '', '', '', '', '', '', '', '',
+    #           '', '0.00', '0.00', '0', '2', '', '', '1', %s, '3', '123456', '18620241959',
+    #            '', '', '', '', '', '123456', '123456', '123456', '123456', '', '', '', '', '',
+    #             '', '', '', '0.00', '', '', '', '')''',(SUPPLIER_ID,USER_ID,SUPPLIER_NAME,SUPPLIER_NAME,ADD_TIME))
+    CURSOR.execute('''INSERT INTO `ecs_supplier` VALUES ('', %s, %s, '3', '2', %s, '1', '10', '145', '1195', '冰河路', 
+                 '18620241959', 'mmp@mmp.com', '', '', '', '', '', '', '', '', '', '', '', 
+                 '', '0.00', '0.00', '0', '2', '', '', '1', %s, '3', '123456', '18620241959',
+                  '', '', '', '', '', '123456', '123456', '123456', '123456', '', '', '', '', '',
+                   '', '', '', '0.00', '', '', '', '')''',
+                   ( USER_ID, SUPPLIER_NAME, SUPPLIER_NAME, ADD_TIME))
 #绑定会员与商店
 def BindUserSupplier():
     global CURSOR
@@ -274,6 +309,7 @@ def FindDBInfo():
         return False
     else:
         # 连接成功
+
         SuccessInfo(400)
     return True
 
