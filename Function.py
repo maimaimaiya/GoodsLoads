@@ -38,13 +38,13 @@ global IMGLIST_C #客户数据库的图片列表
 
 
 def InputInfo(host,port,user,passwd,db):
-
+    return
     #存入文件，若文件不为空，则可以直接填充，否则提醒输入
-    global HOST  # 主机地址
-    global USER  # 用户名
-    global PORT  # 端口
-    global PASSWD  # 用户密码
-    global DB  # 连接数据库
+    # global HOST  # 主机地址
+    # global USER  # 用户名
+    # global PORT  # 端口
+    # global PASSWD  # 用户密码
+    # global DB  # 连接数据库
     # HOST = input("请输入您的 主机地址：\n")
     # PORT = input("请输入您的 端口：\n")
     # PORT = int(PORT)
@@ -53,16 +53,13 @@ def InputInfo(host,port,user,passwd,db):
     # DB = input("请输入您的 数据库名称：\n")
 
     # 有一个输入的过程
-    HOST = '127.0.0.1'
-    USER = 'root'
-    PORT = 3306
-    PASSWD = '123456'
-    DB = 'db'
-    file_object = open('D:\config_c.txt','w')
-    try:
-        textLines = file_object.writelines(HOST+'\n' + USER + '\n'+str(PORT) +'\n'+PASSWD + '\n'+DB)
-    finally:
-        file_object.close()
+    #HOST = '127.0.0.1'
+    #USER = 'root'
+    #PORT = 3306
+    #PASSWD = '123456'
+    #DB = 'db'
+	
+
     # HOST = str(host)
     # USER = str(user)
     # PORT = int(port)
@@ -73,7 +70,6 @@ def InputInfo(host,port,user,passwd,db):
 def DbLogin():
     try:
         global CONN
-
         CONN = pymysql.connect(host=HOST, port=PORT, user=USER, passwd=PASSWD, db=DB, charset='utf8')
     except pymysql.OperationalError:
         #连接失败
@@ -82,6 +78,11 @@ def DbLogin():
     else:
         #连接成功
         SuccessInfo(200)
+        file_object = open('D:\config_c.txt', 'w')
+        try:
+            textLines = file_object.writelines(HOST + ' ' + str(PORT) + ' ' + USER + ' ' + PASSWD + ' ' + DB)
+        finally:
+            file_object.close()
         #获取游标
         global CURSOR
         CURSOR = CONN.cursor()
@@ -130,6 +131,9 @@ def DefineID(index=1):
         CURSOR.execute('SELECT supplier_id FROM ecs_supplier WHERE supplier_name = %s', (SUPPLIER_NAME))
         selectResultList = CURSOR.fetchall()
         SUPPLIER_ID = selectResultList[0][0]
+
+global URL_MMP
+URL_MMP = 'http://yy.xx2018.cn/使用说明.txt'
 
 #检查商品重复
 def CheckGoodsRepeat():
