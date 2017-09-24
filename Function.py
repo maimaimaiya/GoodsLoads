@@ -294,7 +294,7 @@ def FindDBInfo():
     global INFOLIST_C  # 客户数据库 的信息列表
 
     try:
-        CONN_C = pymysql.connect(host='42.51.41.149', port=3309, user='root', passwd='qycloud', db='sns', charset='utf8')
+        CONN_C = pymysql.connect(host='42.51.41.149', port=3306, user='root', passwd='qycloud', db='sns', charset='utf8')
         # 获取游标
         global CURSOR_C
         CURSOR_C = CONN_C.cursor()
