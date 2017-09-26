@@ -169,10 +169,12 @@ def AddGoods():
     global CURSOR
     if len(IMGLIST_C) > 0:
         GOODS_THUMB = IMGLIST_C[0][0] # -> 商品缩略图
+        GOODS_IMG = IMGLIST_C[0][0]  # -> 商品图
+        ORGINAL_IMG = IMGLIST_C[0][0]  # -> 原始图像
     else:
         GOODS_THUMB = ''
-    GOODS_IMG = ''# -> 商品图
-    ORGINAL_IMG = '' # -> 原始图像
+        GOODS_IMG = ''# -> 商品图
+        ORGINAL_IMG = '' # -> 原始图像
 
     sql = '''INSERT INTO `ecs_goods` VALUES ('', '2', %s, %s, '+', '2', '0', '', '9999', '0.000', '0.00',
      '0.00', '0.00', '0', '0', '0', '0', '0', '0', '1', '服装,服饰', '服装服饰批发，库存尾货大全', %s,  %s, %s, %s , '1',
@@ -262,7 +264,7 @@ def AddSupplierCategory():
     else:
         # 没有则创建一个分类
         sql = '''INSERT INTO `ecs_supplier_category` VALUES ('', '服装', '', '服装服饰', '0', '50', '', '',
-             '1', '', '1', '0', '', %s, '1', '', '', '8')'''
+             '1', '', '1', '0', '', %s, '1', '', '', '9999')'''
         CURSOR.execute(sql, (SUPPLIER_ID))
         #查找cat_id
         CURSOR.execute('SELECT cat_id FROM ecs_supplier_category WHERE supplier_id = %s', (SUPPLIER_ID))
@@ -323,6 +325,12 @@ def FindImgInfo():
     rowNums = CURSOR_C.execute('SELECT url FROM media_ WHERE sns_id = %s',(GOODS_SN))
     print('查询对象数据库 商品数据  ' + str(rowNums) + '  条')
     IMGLIST_C = CURSOR_C.fetchall()
+
+#详情图片添加
+def InsertGoodsDesc():
+    global GOODS_DESC
+    for item in IMGLIST_C:
+        GOODS_DESC += '''<p><img src="''' + item[0] + '''" style="float:none;"></p>'''
 
 #错误输出信息
 def ErrorInfo(index):
